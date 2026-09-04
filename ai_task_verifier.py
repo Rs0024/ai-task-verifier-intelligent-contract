@@ -13,17 +13,17 @@ class TaskEscrow(gl.Contract):
     balances: TreeMap[Address, u256]
     escrowed_amount: u256
 
-    def __init__(self, employer: Address, worker: Address, task_description: str, reward_amount: int):
-        self.employer = employer
-        self.worker = worker
+    def __init__(self, employer: str, worker: str, task_description: str, reward_amount: u256):
+        self.employer = Address(employer)
+        self.worker = Address(worker)
         self.task_description = task_description
-        self.reward_amount = u256(reward_amount)
+        self.reward_amount = reward_amount
         self.evidence_url = ""
         self.status = "created"
         self.escrowed_amount = u256(0)
         
-        self.balances[employer] = u256(reward_amount)
-        self.balances[worker] = u256(0)
+        self.balances[self.employer] = reward_amount
+        self.balances[self.worker] = u256(0)
 
     @gl.public.write
     def deposit(self) -> None:
