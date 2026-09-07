@@ -15,11 +15,11 @@ Depending on the consensus result, the contract either releases the escrowed GEN
 1. Employer and worker are assigned during contract deployment.
 2. Employer funds the escrow using `deposit()`.
 3. Worker submits an evidence URL using `submit_work()`.
-4. `verify_and_settle()` retrieves the evidence.
+4. `verify_and_settle()` retrieves the submitted evidence.
 5. GenLayer's nondeterministic AI execution evaluates whether the evidence satisfies the task description.
-6. Validators reach consensus on the result.
-7. If the task is completed, the reward is transferred to the worker.
-8. If the task is rejected, the escrow is refunded to the employer.
+6. Validators reach consensus on the verification result.
+7. If the task is completed, the escrowed reward is transferred to the worker.
+8. If the task is rejected, the escrowed reward is refunded to the employer.
 
 ## Contract States
 
@@ -27,7 +27,7 @@ The contract follows these main states:
 
 `created → funded → submitted → completed_and_paid`
 
-or
+or:
 
 `created → funded → submitted → rejected_and_refunded`
 
@@ -39,6 +39,7 @@ The contract restricts important actions:
 - Only the assigned worker can submit task evidence.
 - Only the employer or worker can trigger verification and settlement.
 - Settlement can only occur after evidence has been submitted.
+- GEN remains under contract custody while the task is being evaluated.
 
 ## Tests
 
@@ -56,32 +57,37 @@ The `tests/test_task_escrow.py` test suite covers authorized and unauthorized co
 
 The contract uses GenLayer nondeterministic execution to retrieve evidence from a submitted URL and ask an AI model whether the evidence satisfies the task description.
 
-Validators independently evaluate the result and use GenLayer consensus to determine the final outcome.
+Validators independently evaluate the result and GenLayer consensus determines the final verification outcome.
+
+The verification result controls whether the escrowed reward is released to the worker or returned to the employer.
 
 ## Live Deployment
 
-The contract has been successfully deployed and executed in GenLayer Studio.
+### Deployed Contract
 
-Tested lifecycle:
+Contract Address:
+
+`0x1BEfbCa71186AE3fa708C4D69b1BB8272F9eA5b3`
+
+The contract was deployed and tested using GenLayer Studio with GEN custody and AI-based consensus verification.
+
+### Tested Lifecycle
 
 `Deploy → Deposit GEN → Submit Evidence → AI Verification → Consensus → Settlement`
 
-A test verification also demonstrated the rejection path, where insufficient evidence produced:
+During testing, the employer successfully funded the contract and the contract transitioned to:
 
-`completed: false`
+`funded`
 
-and the contract correctly transitioned to:
+The worker then submitted evidence and the state transitioned to:
 
-`rejected_and_refunded`
+`submitted`
 
-## Built With
+The AI verification and validator consensus process was then triggered successfully.
 
-- GenLayer Intelligent Contracts
-- Python
-- GenLayer Studio
-- GenLayer AI Consensus
-- GitHub
+A test verification returned:
 
-## Purpose
-
-This project explores trust-minimized task settlement where AI and decentralized validator consensus can determine whether submitted work satisfies predefined requirements.
+```json
+{
+  "completed": false
+}
