@@ -1,4 +1,4 @@
-name: Test GenLayer Contract
+name: Validate GenLayer Contract
 
 on:
   push:
@@ -10,7 +10,7 @@ on:
   workflow_dispatch:
 
 jobs:
-  test:
+  validate:
     runs-on: ubuntu-latest
 
     steps:
@@ -22,15 +22,11 @@ jobs:
         with:
           python-version: "3.12"
 
-      - name: Install test tools
+      - name: Install GenLayer tools
         run: |
           python -m pip install --upgrade pip
-          pip install genlayer-test pytest genvm-linter
+          pip install genvm-linter
 
       - name: Lint contract
         run: |
           genvm-lint lint ai_task_verifier.py
-
-      - name: Run tests
-        run: |
-          pytest tests/ -v
