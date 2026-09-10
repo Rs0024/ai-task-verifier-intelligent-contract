@@ -2,9 +2,13 @@ name: Test GenLayer Contract
 
 on:
   push:
-    branches: [main]
+    branches:
+      - main
+
   pull_request:
-    branches: [main]
+    branches:
+      - main
+
   workflow_dispatch:
 
 jobs:
@@ -25,10 +29,6 @@ jobs:
           python -m pip install --upgrade pip
           pip install --upgrade genlayer-test pytest
 
-      - name: Show installed versions
-        run: |
-          pip show genlayer-test
-          pip show genlayer
-
       - name: Run contract tests
-        run: pytest tests/ -v
+        run: |
+          pytest tests/ -v
