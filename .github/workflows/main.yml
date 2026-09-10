@@ -20,8 +20,10 @@ jobs:
         with:
           python-version: "3.12"
 
-      - name: Install GenLayer CLI
-        run: pip install genlayer
+      - name: Install GenLayer test framework
+        run: |
+          python -m pip install --upgrade pip
+          pip install genlayer-test pytest
 
       - name: Run contract tests
-        run: genlayer test
+        run: pytest tests/ -v
