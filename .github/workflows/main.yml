@@ -4,11 +4,9 @@ on:
   push:
     branches:
       - main
-
   pull_request:
     branches:
       - main
-
   workflow_dispatch:
 
 jobs:
@@ -27,8 +25,12 @@ jobs:
       - name: Install test tools
         run: |
           python -m pip install --upgrade pip
-          pip install --upgrade genlayer-test pytest
+          pip install genlayer-test pytest genvm-linter
 
-      - name: Run contract tests
+      - name: Lint contract
+        run: |
+          genvm-lint lint ai_task_verifier.py
+
+      - name: Run tests
         run: |
           pytest tests/ -v
