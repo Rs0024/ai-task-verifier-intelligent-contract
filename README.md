@@ -2,132 +2,197 @@
 
 TaskEscrow is a GenLayer Intelligent Contract that uses AI and validator consensus to verify whether submitted web evidence proves that a task was completed.
 
-The project demonstrates an onchain workflow for task creation, evidence submission, AI-assisted verification, and consensus-based settlement decisions.
+The project demonstrates an onchain workflow for task creation, funding-state tracking, evidence submission, AI-assisted verification, and a final consensus-based decision.
 
-## Studio Dev Deployment
+## Agent Tank Hackathon
 
-**Network:** GenLayer Studio Dev  
-**Chain ID:** 61997
+TaskEscrow is deployed on **GenLayer Studio Dev / Studio Next** for the Agent Tank Hackathon.
 
-**Contract Address:**
+- Network: GenLayer Studio Dev / Studio Next
+- Chain ID: `61997`
+- Contract Address: `0x2Ca21453a7454bF1A2Ae5F77c4a83A6aE1A8dED9`
 
-`0x5E934B5f06222648Af54c0384a9Fd5916de1f57F`
+## Live Deployment
 
-**Explorer:**
+Contract Explorer:
 
-https://explorer-studio-dev.genlayer.com/address/0x5E934B5f06222648Af54c0384a9Fd5916de1f57F
+https://explorer-studio-dev.genlayer.com/address/0x2Ca21453a7454bF1A2Ae5F77c4a83A6aE1A8dED9
 
-The deployment was finalized successfully through GenLayer consensus.
+Live Website:
 
-## How It Works
+https://rs0024.github.io/ai-task-verifier-intelligent-contract/
 
-### 1. Create Task
+## How TaskEscrow Works
 
-The contract is deployed with:
+TaskEscrow follows a simple verification workflow:
 
-- Employer
-- Worker
-- Task description
-- Reward amount
+1. A task is created with an employer, worker, task description, and configured reward amount.
+2. `mark_funded()` changes the task state to `funded`.
+3. The completed work is submitted using `submit_work(evidence_url)`.
+4. `verify_task()` retrieves the public evidence.
+5. GenLayer's nondeterministic AI execution evaluates whether the evidence proves completion.
+6. Validators independently evaluate the result through GenLayer consensus.
+7. The contract records the final result as `approved` or `rejected`.
 
-Initial status:
+## Contract Workflow
 
-`created`
-
-### 2. Mark Task as Funded
-
-Call:
-
-`mark_funded()`
-
-The contract status changes:
-
-`created → funded`
-
-The current Studio Dev version records the funding state but does not transfer funds.
-
-### 3. Submit Work
-
-The worker provides a public evidence URL using:
-
-`submit_work(evidence_url)`
-
-The contract stores the evidence URL and changes the status:
-
-`funded → submitted`
-
-### 4. AI Verification
-
-Call:
-
-`verify_task()`
-
-The Intelligent Contract:
-
-1. Retrieves the submitted web evidence using `gl.nondet.web.get()`.
-2. Extracts the evidence content.
-3. Sends the task description and evidence to an AI model.
-4. Asks the model whether the evidence clearly proves task completion.
-5. Uses GenLayer validator consensus to independently evaluate the result.
-
-If the evidence is accepted:
-
-`submitted → approved`
-
-If the evidence is rejected:
-
-`submitted → rejected`
-
-## Contract Read Methods
-
-- `get_status()`
-- `get_evidence_url()`
-- `get_task_description()`
-- `get_reward_amount()`
-
-## Contract Write Methods
-
-- `mark_funded()`
-- `submit_work(evidence_url)`
-- `verify_task()`
+```text
+created
+   ↓
+mark_funded()
+   ↓
+funded
+   ↓
+submit_work(evidence_url)
+   ↓
+submitted
+   ↓
+verify_task()
+   ↓
+approved / rejected
+```
 
 ## AI Verification
 
-TaskEscrow does not trust a URL simply because it exists.
+The contract retrieves the submitted public evidence URL and provides its content to an AI verifier.
 
-The contract retrieves the actual web content and asks AI validators to determine whether that content proves completion of the specified task.
+The verifier answers whether the evidence clearly proves that the specified task was completed.
 
-The verification result is accepted through GenLayer's consensus mechanism.
+The contract uses:
 
-## Current Deployment Test
+```python
+gl.vm.run_nondet_default(
+    leader_fn,
+    validator_fn,
+)
+```
 
-Deployment was successfully finalized on GenLayer Studio Dev.
+The validator independently performs the verification and compares its decision with the leader result.
 
-Initial onchain state was verified using:
+This demonstrates how GenLayer Intelligent Contracts can use nondeterministic AI execution together with validator consensus.
+
+## Public Contract Methods
+
+### Write Methods
+
+`mark_funded()`
+
+Records the task as funded.
+
+`submit_work(evidence_url)`
+
+Stores the public evidence URL and changes the status to `submitted`.
+
+`verify_task()`
+
+Runs AI-assisted evidence verification and GenLayer validator consensus.
+
+### View Methods
 
 `get_status()`
 
-Result:
+Returns the current task status.
 
-`created`
+Possible states:
+
+```text
+created
+funded
+submitted
+approved
+rejected
+```
+
+`get_evidence_url()`
+
+Returns the submitted evidence URL.
+
+`get_task_description()`
+
+Returns the task description.
+
+`get_reward_amount()`
+
+Returns the configured reward amount.
+
+## Important Note
+
+The current hackathon version demonstrates an **AI-verified task and settlement-decision workflow**.
+
+`mark_funded()` records the funding state in the contract. The current version does not transfer or custody tokens automatically.
+
+The configured reward amount represents the reward associated with the task and can be used by future versions to support full onchain escrow settlement.
+
+## Example Workflow
+
+```text
+Task Created
+      ↓
+Funding State Recorded
+      ↓
+Worker Submits Public Evidence
+      ↓
+GenLayer AI Evaluates Evidence
+      ↓
+Validators Reach Consensus
+      ↓
+Approved or Rejected
+```
+
+## Example Task
+
+Task:
+
+```text
+Build and submit a task completion report with verifiable evidence.
+```
+
+Reward:
+
+```text
+100
+```
+
+After evidence is submitted, `verify_task()` evaluates the evidence and the final consensus result is stored onchain.
+
+## Repository Structure
+
+```text
+ai-task-verifier-intelligent-contract/
+├── ai_task_verifier.py
+├── index.html
+├── README.md
+├── evidence.md
+└── tests/
+```
 
 ## Technology
 
 - GenLayer Intelligent Contracts
 - Python
-- GenLayer Studio Dev
-- GenLayer AI / LLM execution
-- Web evidence retrieval
+- GenLayer Studio Dev / Studio Next
+- AI-assisted nondeterministic execution
 - Validator consensus
+- GitHub Pages
 
-## Contract Source
+## Why TaskEscrow?
 
-The Intelligent Contract is located at:
+Traditional freelance and task platforms depend on a centralized party to decide whether work was completed correctly.
 
-`ai_task_verifier.py`
+TaskEscrow demonstrates a different approach: submitted evidence can be evaluated through an Intelligent Contract, while GenLayer validators participate in reaching the final decision.
 
-## Hackathon
+This creates a transparent and auditable foundation for future decentralized work verification, AI-agent commerce, milestone verification, and settlement systems.
 
-TaskEscrow is being developed for the GenLayer Agent Tank Hackathon.
+## Current Deployment
 
-The project explores AI-verifiable task completion for future-of-work and agentic commerce applications.
+**Chain ID:** `61997`
+
+**Contract:**
+
+```text
+0x2Ca21453a7454bF1A2Ae5F77c4a83A6aE1A8dED9
+```
+
+**Explorer:**
+
+https://explorer-studio-dev.genlayer.com/address/0x2Ca21453a7454bF1A2Ae5F77c4a83A6aE1A8dED9
