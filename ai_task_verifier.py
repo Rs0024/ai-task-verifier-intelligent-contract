@@ -97,7 +97,7 @@ or
                 == leader_result.calldata.get("completed")
             )
 
-        result = gl.vm.run_nondet_unsafe(
+        result = gl.vm.run_nondet_default(
             leader_fn,
             validator_fn,
         )
