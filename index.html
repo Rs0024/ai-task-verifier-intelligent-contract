@@ -1,1 +1,462 @@
-This matches the contract you actually deployed: mark_funded, submit_work, verify_task, and the four read methods. For a truly in-page wallet transaction flow later, the recommended GenLayer approach is GenLayerJS/Transaction Kit with the Studio-dev chain definition, fee estimation, wallet signing, and finalization checks.
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>TaskEscrow | AI-Verified Task Completion</title>
+
+  <style>
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+
+    body {
+      font-family: Arial, Helvetica, sans-serif;
+      background: #080d1c;
+      color: #ffffff;
+      min-height: 100vh;
+    }
+
+    header {
+      padding: 20px 30px;
+      border-bottom: 1px solid #293654;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      background: #090f20;
+    }
+
+    .logo {
+      font-size: 24px;
+      font-weight: bold;
+    }
+
+    .network {
+      background: #172441;
+      padding: 9px 14px;
+      border-radius: 25px;
+      font-size: 13px;
+    }
+
+    .container {
+      max-width: 1000px;
+      margin: auto;
+      padding: 50px 20px;
+    }
+
+    .hero {
+      text-align: center;
+      margin-bottom: 45px;
+    }
+
+    .badge {
+      display: inline-block;
+      padding: 7px 14px;
+      background: #162445;
+      color: #a9c8ff;
+      border-radius: 20px;
+      font-size: 13px;
+      margin-bottom: 18px;
+    }
+
+    .hero h1 {
+      font-size: 44px;
+      margin-bottom: 18px;
+    }
+
+    .hero p {
+      max-width: 720px;
+      margin: auto;
+      line-height: 1.7;
+      color: #a8b5d3;
+    }
+
+    .card {
+      background: #121a30;
+      border: 1px solid #293654;
+      border-radius: 15px;
+      padding: 26px;
+      margin-bottom: 22px;
+    }
+
+    .card h2 {
+      margin-bottom: 20px;
+      font-size: 21px;
+    }
+
+    .label {
+      color: #8294ba;
+      font-size: 13px;
+      margin-bottom: 6px;
+    }
+
+    .value {
+      margin-bottom: 17px;
+      line-height: 1.6;
+      word-break: break-word;
+    }
+
+    .address {
+      font-family: monospace;
+      color: #b8cbff;
+    }
+
+    .status {
+      display: inline-block;
+      padding: 8px 14px;
+      border-radius: 20px;
+      background: #18345a;
+      font-weight: bold;
+    }
+
+    .deployed {
+      color: #35d07f;
+      font-weight: bold;
+    }
+
+    .grid {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 15px;
+    }
+
+    .step {
+      background: #0e162a;
+      border: 1px solid #293654;
+      border-radius: 11px;
+      padding: 20px;
+    }
+
+    .number {
+      width: 32px;
+      height: 32px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      background: #665cff;
+      border-radius: 50%;
+      font-weight: bold;
+      margin-bottom: 13px;
+    }
+
+    .step h3 {
+      margin-bottom: 9px;
+      font-size: 16px;
+    }
+
+    .step p {
+      color: #a8b5d3;
+      font-size: 14px;
+      line-height: 1.55;
+    }
+
+    input {
+      width: 100%;
+      padding: 14px;
+      margin: 9px 0 14px;
+      background: #091226;
+      color: white;
+      border: 1px solid #35466b;
+      border-radius: 9px;
+      outline: none;
+    }
+
+    button,
+    .button {
+      display: inline-block;
+      padding: 12px 17px;
+      border-radius: 8px;
+      border: none;
+      background: #665cff;
+      color: white;
+      font-weight: bold;
+      cursor: pointer;
+      text-decoration: none;
+      margin: 5px 7px 5px 0;
+      font-size: 14px;
+    }
+
+    .secondary {
+      background: #243252;
+    }
+
+    button:hover,
+    .button:hover {
+      opacity: 0.88;
+    }
+
+    #result {
+      margin-top: 15px;
+      color: #c9d4ed;
+      line-height: 1.6;
+      word-break: break-word;
+    }
+
+    .notice {
+      margin-top: 18px;
+      padding: 17px;
+      background: #0c1d34;
+      border-left: 4px solid #5da9ff;
+      border-radius: 7px;
+      color: #c7d6ee;
+      line-height: 1.6;
+    }
+
+    footer {
+      text-align: center;
+      padding: 35px 20px;
+      color: #7e8cac;
+      font-size: 13px;
+    }
+
+    @media (max-width: 750px) {
+      .grid {
+        grid-template-columns: 1fr;
+      }
+
+      .hero h1 {
+        font-size: 33px;
+      }
+
+      header {
+        flex-direction: column;
+        gap: 12px;
+      }
+    }
+  </style>
+</head>
+
+<body>
+
+<header>
+  <div class="logo">TaskEscrow</div>
+  <div class="network">GenLayer Studio Dev • Chain ID 61997</div>
+</header>
+
+<main class="container">
+
+  <section class="hero">
+    <div class="badge">Agent Tank Hackathon</div>
+
+    <h1>AI-Verified Task Completion</h1>
+
+    <p>
+      TaskEscrow is a GenLayer Intelligent Contract that evaluates
+      publicly accessible task evidence using AI-assisted
+      nondeterministic execution and validator consensus.
+    </p>
+  </section>
+
+  <section class="card">
+    <h2>Live Intelligent Contract</h2>
+
+    <div class="label">Network</div>
+    <div class="value">
+      GenLayer Studio Dev
+      <span class="deployed">● DEPLOYED</span>
+    </div>
+
+    <div class="label">Chain ID</div>
+    <div class="value">61997</div>
+
+    <div class="label">Contract Address</div>
+    <div class="value address">
+      0x5E934B5f06222648Af54c0384a9Fd5916de1f57F
+    </div>
+
+    <div class="label">Task</div>
+    <div class="value">
+      Build and submit a task completion report with verifiable evidence.
+    </div>
+
+    <div class="label">Configured Reward</div>
+    <div class="value">100</div>
+
+    <div class="label">Initial Onchain State</div>
+    <span class="status">created</span>
+  </section>
+
+  <section class="card">
+    <h2>How TaskEscrow Works</h2>
+
+    <div class="grid">
+
+      <div class="step">
+        <div class="number">1</div>
+        <h3>Fund Task</h3>
+        <p>
+          The workflow begins by changing the contract state
+          from created to funded.
+        </p>
+      </div>
+
+      <div class="step">
+        <div class="number">2</div>
+        <h3>Submit Evidence</h3>
+        <p>
+          The worker submits a public evidence URL representing
+          the completed work.
+        </p>
+      </div>
+
+      <div class="step">
+        <div class="number">3</div>
+        <h3>AI Verification</h3>
+        <p>
+          GenLayer retrieves the evidence and validators reach
+          consensus on whether the task was completed.
+        </p>
+      </div>
+
+    </div>
+  </section>
+
+  <section class="card">
+    <h2>Evidence Preview</h2>
+
+    <div class="label">Public Evidence URL</div>
+
+    <input
+      id="evidence"
+      type="url"
+      placeholder="https://example.com/public-task-evidence"
+    >
+
+    <button onclick="checkEvidence()">
+      Check Evidence URL
+    </button>
+
+    <div id="result"></div>
+
+    <div class="notice">
+      This page previews evidence for the TaskEscrow workflow.
+      Actual state-changing transactions are signed and executed
+      against the deployed Intelligent Contract on GenLayer Studio Dev.
+    </div>
+  </section>
+
+  <section class="card">
+    <h2>Contract Workflow</h2>
+
+    <div class="label">Write Methods</div>
+
+    <div class="value">
+      <strong>mark_funded()</strong><br>
+      <strong>submit_work(evidence_url)</strong><br>
+      <strong>verify_task()</strong>
+    </div>
+
+    <div class="label">Read Methods</div>
+
+    <div class="value">
+      get_status()<br>
+      get_evidence_url()<br>
+      get_task_description()<br>
+      get_reward_amount()
+    </div>
+
+    <div class="label">Possible Verification Result</div>
+
+    <div class="value">
+      After AI-assisted validator consensus, the contract records
+      the task as <strong>approved</strong> or <strong>rejected</strong>.
+    </div>
+  </section>
+
+  <section class="card">
+    <h2>Live Deployment</h2>
+
+    <p class="value">
+      TaskEscrow is deployed on the GenLayer Studio Dev network.
+      The contract source, deployment transaction and consensus
+      activity can be inspected publicly.
+    </p>
+
+    <a
+      class="button"
+      href="https://explorer-studio-dev.genlayer.com/address/0x5E934B5f06222648Af54c0384a9Fd5916de1f57F"
+      target="_blank"
+      rel="noopener noreferrer"
+    >
+      View Live Contract
+    </a>
+
+    <a
+      class="button secondary"
+      href="https://explorer-studio-dev.genlayer.com/tx/0xce89e0f137bd191a178d2cd3fb4eef98806eb148ec5df420dc32ecc4e39223b9"
+      target="_blank"
+      rel="noopener noreferrer"
+    >
+      Deployment Transaction
+    </a>
+  </section>
+
+  <section class="card">
+    <h2>Project Resources</h2>
+
+    <a
+      class="button"
+      href="https://github.com/Rs0024/ai-task-verifier-intelligent-contract"
+      target="_blank"
+      rel="noopener noreferrer"
+    >
+      GitHub Source Code
+    </a>
+
+    <a
+      class="button secondary"
+      href="https://studio-dev.genlayer.com/"
+      target="_blank"
+      rel="noopener noreferrer"
+    >
+      GenLayer Studio Dev
+    </a>
+  </section>
+
+</main>
+
+<footer>
+  TaskEscrow • Agent Tank Hackathon • Built with GenLayer
+</footer>
+
+<script>
+  function checkEvidence() {
+    const input = document.getElementById("evidence");
+    const result = document.getElementById("result");
+    const value = input.value.trim();
+
+    if (!value) {
+      result.textContent = "Please enter a public evidence URL.";
+      return;
+    }
+
+    try {
+      const url = new URL(value);
+
+      if (url.protocol !== "https:" && url.protocol !== "http:") {
+        throw new Error("Invalid protocol");
+      }
+
+      result.innerHTML =
+        "<strong>Evidence URL ready.</strong><br>" +
+        escapeHtml(value) +
+        "<br><br>This URL can be supplied to the " +
+        "<strong>submit_work</strong> contract method.";
+
+    } catch (error) {
+      result.textContent =
+        "Please enter a valid http:// or https:// URL.";
+    }
+  }
+
+  function escapeHtml(text) {
+    const div = document.createElement("div");
+    div.textContent = text;
+    return div.innerHTML;
+  }
+</script>
+
+</body>
+</html>
